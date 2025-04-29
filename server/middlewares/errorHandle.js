@@ -1,8 +1,5 @@
 function errorHandler(error, req, res, next) {
-  //   console.log("Request URL:", req, originalUrl);
-  //   console.log("Request method:", req.method);
-
-  //   console.log(error, "<<< err");
+  console.log(error, "<<< err");
   if (
     error.name === "SequelizeValidationError" ||
     error.name === "SequelizeUniqueConstraintError"
@@ -24,7 +21,6 @@ function errorHandler(error, req, res, next) {
   if (error.name === "NotFound") {
     return res.status(404).json({ message: error.message });
   }
-  // Handling untuk error dengan properti statusCode (seperti yang digunakan di getHeroById)
   if (error.statusCode) {
     return res.status(error.statusCode).json({ message: error.message });
   }

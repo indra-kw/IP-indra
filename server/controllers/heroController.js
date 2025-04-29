@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { Hero } = require("../models");
 
 class HeroController {
   static async getHeroes(req, res, next) {
@@ -83,6 +84,64 @@ class HeroController {
           message: "Service unavailable",
         });
       }
+      next(error);
+    }
+  }
+
+  static async updateHero(req, res, next) {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        throw { statusCode: 400, message: "Hero ID is required" };
+      }
+      const { hero_name, hero_avatar, hero_role, hero_specially } = req.body;
+      const hero = await Hero.findByPk(id);
+      if (!hero) {
+        throw { statusCode: 404, message: "Hero not found" };
+      }
+      await hero.update({
+        hero_name: hero_name || hero.hero_name,
+        hero_avatar: hero_avatar || hero.hero_avatar,
+        hero_role: hero_role || hero.hero_role,
+        hero_specially: hero_specially || hero.hero_specially,
+      });
+      res.status(200).json({
+        message: "Hero updated successfully",
+        hero: {
+          id: hero.id,
+          hero_name: hero.hero_name,
+          hero_avatar: hero.hero_avatar,
+          hero_role: hero.hero_role,
+          hero_specially: hero.hero_specially,
+          updatedAt: hero.updatedAt,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async deleteHero(req, res, next) {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        throw { statusCode: 400, message: "Hero ID is required" };
+      }
+      const hero = await Hero.findByPk(id);
+      if (!hero) {
+        throw { statusCode: 404, message: "Hero not found" };
+      }
+      await hero.destroy();
+      res.status(200).json({
+        message: "Hero deleted successfully",
+        deletedHero: {
+          id: hero.id,
+          hero_name: hero.hero_name,
+          hero_role: hero.hero_role,
+          hero_specially: hero.hero_specially,
+        },
+      });
+    } catch (error) {
       next(error);
     }
   }

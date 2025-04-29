@@ -10,8 +10,9 @@ router.get("/hero", HeroController.getHeroes);
 router.get("/role", HeroController.getHeroesByRole);
 router.get("/specially", HeroController.getHeroesBySpecially);
 router.get("/hero/:id", HeroController.getHeroById);
+router.put("/hero/:id", HeroController.updateHero);
+router.delete("/hero/:id", HeroController.deleteHero);
 
-// Gemini AI endpoint
 router.post("/gemini/generate", GeminiController.generateAIContent);
 
 module.exports = router;
