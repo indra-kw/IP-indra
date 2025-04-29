@@ -1,29 +1,19 @@
 const axios = require("axios");
 
 class HeroController {
-  static async getHeroById(req, res, next) {
-    try {
-      const { id } = req.params;
-      const response = await axios.get(
-        `https://api.dazelpro.com/mobile-legends/hero/${id}`
-      );
-      console.log(id);
-
-      if (!response.data.hero.length) {
-        throw { statusCode: 404, message: "Hero not found" };
-      }
-      res.status(200).json(response.data);
-    } catch (error) {
-      next(error);
-    }
-  }
-
   static async getHeroes(req, res, next) {
     try {
       const response = await axios.get(
         "https://api.dazelpro.com/mobile-legends/hero"
       );
-      res.status(200).json(response.data);
+      const formattedHeroes = response.data.hero.map((hero) => ({
+        id: hero.hero_id,
+        hero_name: hero.hero_name,
+        hero_avatar: hero.hero_avatar,
+        hero_role: hero.hero_role,
+        hero_specially: hero.hero_specially,
+      }));
+      res.status(200).json(formattedHeroes);
     } catch (error) {
       next(error);
     }
@@ -34,7 +24,11 @@ class HeroController {
       const response = await axios.get(
         "https://api.dazelpro.com/mobile-legends/role"
       );
-      res.status(200).json(response.data);
+      const formattedRoles = response.data.role.map((role, index) => ({
+        role_id: index + 1,
+        role_name: role.role_name,
+      }));
+      res.status(200).json(formattedRoles);
     } catch (error) {
       next(error);
     }
@@ -45,7 +39,13 @@ class HeroController {
       const response = await axios.get(
         "https://api.dazelpro.com/mobile-legends/specially"
       );
-      res.status(200).json(response.data);
+      const formattedSpecialties = response.data.specially.map(
+        (specially, index) => ({
+          specially_id: index + 1,
+          specially_name: specially.specially_name,
+        })
+      );
+      res.status(200).json(formattedSpecialties);
     } catch (error) {
       next(error);
     }
@@ -54,24 +54,23 @@ class HeroController {
   static async getHeroById(req, res, next) {
     try {
       const { id } = req.params;
-
       if (!id) {
         throw { statusCode: 400, message: "Hero ID is required" };
       }
-
       const response = await axios.get(
         `https://api.dazelpro.com/mobile-legends/hero/${id}`
       );
-
-      if (
-        !response.data ||
-        !response.data.hero ||
-        response.data.hero.length === 0
-      ) {
+      if (!response.data.hero || response.data.hero.length === 0) {
         throw { statusCode: 404, message: "Hero not found" };
       }
-
-      res.status(200).json(response.data);
+      const formattedHero = response.data.hero.map((hero) => ({
+        id: hero.hero_id,
+        hero_name: hero.hero_name,
+        hero_avatar: hero.hero_avatar,
+        hero_role: hero.hero_role,
+        hero_specially: hero.hero_specially,
+      }));
+      res.status(200).json(formattedHero[0]);
     } catch (error) {
       if (error.response) {
         return next({
@@ -84,7 +83,6 @@ class HeroController {
           message: "Service unavailable",
         });
       }
-
       next(error);
     }
   }
