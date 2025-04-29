@@ -5,20 +5,20 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     const favorites = [
       {
-        UserId: 1, // User with email user1@mail.com
-        HeroId: 1, // First hero
+        UserId: 1,
+        HeroId: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        UserId: 1, // User with email user1@mail.com
-        HeroId: 2, // Second hero
+        UserId: 1,
+        HeroId: 2,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        UserId: 2, // User with email user2@mail.com
-        HeroId: 3, // Third hero
+        UserId: 2,
+        HeroId: 3,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
