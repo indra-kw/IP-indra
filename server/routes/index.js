@@ -1,10 +1,15 @@
 const UserController = require("../controllers/userController");
 const HeroController = require("../controllers/heroController");
 const GeminiController = require("../controllers/geminiController");
+const FavoriteController = require("../controllers/favoriteController");
 const router = require("express").Router();
 
 router.post("/register", UserController.Register);
 router.post("/login", UserController.Login);
+
+router.get("/favorite", FavoriteController.getFavorite);
+router.put("/favorite/:id", FavoriteController.editFavorite);
+router.delete("/favorite/:id", FavoriteController.deleteFavorite);
 
 router.get("/hero", HeroController.getHeroes);
 router.get("/role", HeroController.getHeroesByRole);

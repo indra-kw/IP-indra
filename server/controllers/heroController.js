@@ -1,4 +1,3 @@
-const axios = require("axios");
 const { Hero, Favorite } = require("../models");
 
 class HeroController {
@@ -193,5 +192,26 @@ class HeroController {
     }
   }
 }
+
+// static async getFavorite(req, res, next) {
+//     try {
+//       let favorite = await Favorite.findAll();
+//       res.status(200).json(favorite);
+//     } catch (error) {
+//       next(error);
+//     }
+//   }
+
+//   static async deleteFavorite(req, res, next) {
+//     try {
+//       let favoriteId = req.params.id;
+//       let favorite = await Favorite.findByPk(favoriteId);
+//       await favorite.destroy();
+//       res.status(200).json({ message: `${favorite.name} success to delete` });
+//     } catch (error) {
+//       // console.log(error);
+//       next(error);
+//     }
+//   }
 
 module.exports = HeroController;
