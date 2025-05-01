@@ -49,9 +49,7 @@ class HeroController {
       if (!id) {
         throw { statusCode: 400, message: "Hero ID is required" };
       }
-      const response = await axios.get(
-        `https://api.dazelpro.com/mobile-legends/hero/${id}`
-      );
+      const response = await axios.get(`http://localhost:3009/hero/${id}`);
       if (!response.data.hero || response.data.hero.length === 0) {
         throw { statusCode: 404, message: "Hero not found" };
       }
