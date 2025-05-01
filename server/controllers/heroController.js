@@ -49,31 +49,28 @@ class HeroController {
       if (!id) {
         throw { statusCode: 400, message: "Hero ID is required" };
       }
-      const response = await axios.get(`http://localhost:3009/hero/${id}`);
-      if (!response.data.hero || response.data.hero.length === 0) {
+      const heroData = require("../data/hero.json");
+      const hero = heroData.find((hero) => hero.id === parseInt(id));
+      if (!hero) {
         throw { statusCode: 404, message: "Hero not found" };
       }
-      const formattedHero = response.data.hero.map((hero) => ({
-        id: hero.hero_id,
+      const formattedHero = {
+        id: hero.id,
         hero_name: hero.hero_name,
         hero_avatar: hero.hero_avatar,
         hero_role: hero.hero_role,
         hero_specially: hero.hero_specially,
-      }));
-      res.status(200).json(formattedHero[0]);
+      };
+
+      res.status(200).json(formattedHero);
     } catch (error) {
-      if (error.response) {
-        return next({
-          statusCode: error.response.status,
-          message: error.response.data.message || "API error",
-        });
-      } else if (error.request) {
-        return next({
-          statusCode: 503,
-          message: "Service unavailable",
-        });
+      if (error.statusCode) {
+        return next(error);
       }
-      next(error);
+      next({
+        statusCode: 500,
+        message: "Internal server error: " + error.message,
+      });
     }
   }
 
