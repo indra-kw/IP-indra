@@ -10,6 +10,18 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
+      hero_name: {
+        type: Sequelize.STRING,
+      },
+      hero_avatar: {
+        type: Sequelize.STRING,
+      },
+      hero_role: {
+        type: Sequelize.STRING,
+      },
+      hero_specially: {
+        type: Sequelize.STRING,
+      },
       UserId: {
         type: Sequelize.INTEGER,
         references: {

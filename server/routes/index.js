@@ -10,6 +10,7 @@ router.get("/hero", HeroController.getHeroes);
 router.get("/role", HeroController.getHeroesByRole);
 router.get("/specially", HeroController.getHeroesBySpecially);
 router.get("/hero/:id", HeroController.getHeroById);
+router.post("/hero", HeroController.addHero);
 router.put("/hero/:id", HeroController.updateHero);
 router.delete("/hero/:id", HeroController.deleteHero);
 
