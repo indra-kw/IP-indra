@@ -15,7 +15,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
-            <Route path="/myfavorite" element={<MyFavorite />} />
+            <Route path="/favorite" element={<MyFavorite />} />
           </Route>
         </Routes>
       </BrowserRouter>

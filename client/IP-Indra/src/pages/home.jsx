@@ -18,8 +18,43 @@ export default function Home() {
   // Sort By
   const [specially, setSpecialties] = useState([]);
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState("");
+  // Add Favorite
+  const [addingToFavorite, setAddingToFavorite] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
+  async function addToFavorite(hero) {
+    try {
+      setAddingToFavorite(true);
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        alert("Please login first to add favorites");
+        navigate("/login");
+        return;
+      }
+      const heroData = {
+        hero_name: hero.hero_name,
+        hero_avatar: hero.hero_avatar,
+        hero_role: hero.hero_role,
+        hero_specially: hero.hero_specially,
+      };
+      const response = await axios.post(
+        "http://localhost:3009/hero",
+        heroData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      navigate("/favorite");
+    } catch (error) {
+      console.error("Error adding hero to favorites:", error);
+    } finally {
+      setAddingToFavorite(false);
+    }
+  }
+
   const getSearchQuery = () => {
     const searchParams = new URLSearchParams(location.search);
     return searchParams.get("search") || "";
@@ -96,17 +131,6 @@ export default function Home() {
       setHero(response.data);
       setError(null);
     } catch (error) {
-      console.log("Error fetching heroes:", error);
-      if (
-        error.code === "ERR_CONNECTION_REFUSED" ||
-        error.code === "ECONNREFUSED"
-      ) {
-        console.warn("Using dummy data because API is not available");
-        setHero(dummyHeroes);
-        setError("Cannot connect to the server. Using sample data instead.");
-      } else {
-        setError(`Failed to load heroes: ${error.message}`);
-      }
     } finally {
       setLoading(false);
     }
@@ -256,43 +280,7 @@ export default function Home() {
     fetchRoles();
     fetchSpecialties();
   }, [location.search]);
-  const addToFavorite = async (heroId) => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        alert("Please login first");
-        navigate("/login");
-        return;
-      }
-      try {
-        await axios.post(
-          "http://localhost:3009/favorites",
-          { heroId },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        alert("Hero added to favorites!");
-        navigate("/myfavorite");
-      } catch (apiError) {
-        if (
-          apiError.code === "ERR_CONNECTION_REFUSED" ||
-          apiError.code === "ECONNREFUSED"
-        ) {
-          alert("Server is not available. Please try again later.");
-        } else {
-          alert(`Failed to add to favorites: ${apiError.message}`);
-        }
-      }
-    } catch (error) {
-      console.error("Error adding to favorites:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+
   const indexOfLastHero = currentPage * itemsPerPage;
   const indexOfFirstHero = indexOfLastHero - itemsPerPage;
   const heroesToDisplay = isSearching ? searchResults : hero;
@@ -389,18 +377,20 @@ export default function Home() {
               <img src={hero.hero_avatar} className="card-img-top img-fluid" />
               <div className="card-body text-center">
                 <h5 className="card-title">{hero.hero_name || "Hero Name"}</h5>
-                <p className="card-text">
-                  {hero.hero_role || "No description available"}
-                </p>
-                <p className="card-text">
-                  {hero.hero_specially || "No description available"}
-                </p>
+                <div className="mb-3">
+                  <span className="badge bg-secondary me-2">
+                    {hero.hero_role || "Unknown Role"}
+                  </span>
+                  <span className="badge bg-info">
+                    {hero.hero_specially || "Unknown Specialty"}
+                  </span>
+                </div>
                 <button
                   className="btn btn-primary"
-                  onClick={() => addToFavorite(hero.id)}
-                  disabled={loading}
+                  onClick={() => addToFavorite(hero)}
+                  disabled={addingToFavorite}
                 >
-                  {loading ? "Adding..." : "Add Favorite"}
+                  {addingToFavorite ? "Adding..." : "Add Favorite"}
                 </button>
               </div>
             </div>
