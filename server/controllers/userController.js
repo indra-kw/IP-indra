@@ -60,6 +60,32 @@ class UserController {
       res.status(500).json({ message: "Internal server error" });
     }
   }
+  static async profile(req, res, next) {
+    try {
+      const user = await User.findByPk(req.user.id);
+      console.log(user);
+
+      if (!user) {
+        throw { statusCode: 404, message: "User not found" };
+      }
+      res.status(200).json({ id: user.id, email: user.email });
+    } catch (error) {
+      next(error);
+    }
+  }
+  static async updateProfile(req, res, next) {
+    try {
+      const { email } = req.body;
+      const user = await User.findByPk(req.user.id);
+      if (!user) {
+        throw { statusCode: 404, message: "User not found" };
+      }
+      await user.update({ email });
+      res.status(200).json({ id: user.id, email: user.email });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = UserController;

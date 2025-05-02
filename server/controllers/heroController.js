@@ -1,4 +1,5 @@
 const { Hero, Favorite } = require("../models");
+const axios = require("axios"); // Add axios import
 
 class HeroController {
   static async getHeroes(req, res, next) {
@@ -48,11 +49,26 @@ class HeroController {
       if (!id) {
         throw { statusCode: 400, message: "Hero ID is required" };
       }
+
+      // First try to find the hero in the database
+      const dbHero = await Hero.findByPk(id);
+      if (dbHero) {
+        return res.status(200).json({
+          id: dbHero.id,
+          hero_name: dbHero.hero_name,
+          hero_avatar: dbHero.hero_avatar,
+          hero_role: dbHero.hero_role,
+          hero_specially: dbHero.hero_specially,
+        });
+      }
+
+      // If not found in database, check the JSON file
       const heroData = require("../data/hero.json");
       const hero = heroData.find((hero) => hero.id === parseInt(id));
       if (!hero) {
         throw { statusCode: 404, message: "Hero not found" };
       }
+
       const formattedHero = {
         id: hero.id,
         hero_name: hero.hero_name,
@@ -141,16 +157,34 @@ class HeroController {
         throw { statusCode: 400, message: "Hero ID is required" };
       }
       const { hero_name, hero_avatar, hero_role, hero_specially } = req.body;
-      const hero = await Favorite.findByPk(id);
+
+      // First find the hero in the Hero model
+      const hero = await Hero.findByPk(id);
       if (!hero) {
         throw { statusCode: 404, message: "Hero not found" };
       }
+
+      // Update the hero
       await hero.update({
         hero_name: hero_name || hero.hero_name,
         hero_avatar: hero_avatar || hero.hero_avatar,
         hero_role: hero_role || hero.hero_role,
         hero_specially: hero_specially || hero.hero_specially,
       });
+
+      // Also update any related favorites
+      await Favorite.update(
+        {
+          hero_name: hero_name || hero.hero_name,
+          hero_avatar: hero_avatar || hero.hero_avatar,
+          hero_role: hero_role || hero.hero_role,
+          hero_specially: hero_specially || hero.hero_specially,
+        },
+        {
+          where: { HeroId: id },
+        }
+      );
+
       res.status(200).json({
         message: "Hero updated successfully",
         hero: {
@@ -177,7 +211,15 @@ class HeroController {
       if (!hero) {
         throw { statusCode: 404, message: "Hero not found" };
       }
-      await Favorite.destroy();
+
+      // Delete related favorites first
+      await Favorite.destroy({
+        where: { HeroId: id },
+      });
+
+      // Then delete the hero
+      await hero.destroy();
+
       res.status(200).json({
         message: "Hero deleted successfully",
         deletedHero: {

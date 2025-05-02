@@ -2,11 +2,13 @@ const UserController = require("../controllers/userController");
 const HeroController = require("../controllers/heroController");
 const GeminiController = require("../controllers/geminiController");
 const FavoriteController = require("../controllers/favoriteController");
+const Authentication = require("../middlewares/auth");
 const router = require("express").Router();
 
 router.post("/register", UserController.Register);
 router.post("/login", UserController.Login);
-router.post("/authgoogle", UserController.googleLogin); // Add this new route to match frontend request
+router.post("/authgoogle", UserController.googleLogin);
+//route get profile user
 
 router.get("/favorite", FavoriteController.getFavorite);
 router.put("/favorite/:id", FavoriteController.editFavorite);
@@ -21,5 +23,9 @@ router.put("/hero/:id", HeroController.updateHero);
 router.delete("/hero/:id", HeroController.deleteHero);
 
 router.post("/gemini/generate", GeminiController.generateAIContent);
+
+router.use(Authentication);
+router.get("/profile", UserController.profile);
+router.put("/profile", UserController.updateProfile);
 
 module.exports = router;
