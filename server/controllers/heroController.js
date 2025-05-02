@@ -28,6 +28,7 @@ class HeroController {
   }
 
   static async getHeroesBySpecially(req, res, next) {
+    // ambil dari api public
     try {
       const response = await axios.get(
         "https://api.dazelpro.com/mobile-legends/specially"
