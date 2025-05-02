@@ -15,6 +15,38 @@ module.exports = (sequelize, DataTypes) => {
   }
   Favorite.init(
     {
+      hero_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "Hero name is required" },
+          notEmpty: { msg: "Hero name is required" },
+        },
+      },
+      hero_avatar: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "Hero avatar is required" },
+          notEmpty: { msg: "Hero avatar is required" },
+        },
+      },
+      hero_role: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "Hero role is required" },
+          notEmpty: { msg: "Hero role is required" },
+        },
+      },
+      hero_specially: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "Hero specially is required" },
+          notEmpty: { msg: "Hero specially is required" },
+        },
+      },
       UserId: {
         type: DataTypes.INTEGER,
         allowNull: false,
