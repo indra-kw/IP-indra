@@ -1,26 +1,18 @@
-const axios = require("axios");
-const { Hero } = require("../models");
+const { Hero, Favorite } = require("../models");
+const axios = require("axios"); // Add axios import
 
 class HeroController {
   static async getHeroes(req, res, next) {
     try {
-      const response = await axios.get(
-        "https://api.dazelpro.com/mobile-legends/hero"
-      );
-      const formattedHeroes = response.data.hero.map((hero) => ({
-        id: hero.hero_id,
-        hero_name: hero.hero_name,
-        hero_avatar: hero.hero_avatar,
-        hero_role: hero.hero_role,
-        hero_specially: hero.hero_specially,
-      }));
-      res.status(200).json(formattedHeroes);
+      let hero = await Hero.findAll();
+      res.status(200).json(hero);
     } catch (error) {
       next(error);
     }
   }
 
   static async getHeroesByRole(req, res, next) {
+    // ambil dari api public
     try {
       const response = await axios.get(
         "https://api.dazelpro.com/mobile-legends/role"
@@ -36,6 +28,7 @@ class HeroController {
   }
 
   static async getHeroesBySpecially(req, res, next) {
+    // ambil dari api public
     try {
       const response = await axios.get(
         "https://api.dazelpro.com/mobile-legends/specially"
@@ -58,32 +51,104 @@ class HeroController {
       if (!id) {
         throw { statusCode: 400, message: "Hero ID is required" };
       }
-      const response = await axios.get(
-        `https://api.dazelpro.com/mobile-legends/hero/${id}`
-      );
-      if (!response.data.hero || response.data.hero.length === 0) {
+
+      // First try to find the hero in the database
+      const dbHero = await Hero.findByPk(id);
+      if (dbHero) {
+        return res.status(200).json({
+          id: dbHero.id,
+          hero_name: dbHero.hero_name,
+          hero_avatar: dbHero.hero_avatar,
+          hero_role: dbHero.hero_role,
+          hero_specially: dbHero.hero_specially,
+        });
+      }
+
+      // If not found in database, check the JSON file
+      const heroData = require("../data/hero.json");
+      const hero = heroData.find((hero) => hero.id === parseInt(id));
+      if (!hero) {
         throw { statusCode: 404, message: "Hero not found" };
       }
-      const formattedHero = response.data.hero.map((hero) => ({
-        id: hero.hero_id,
+
+      const formattedHero = {
+        id: hero.id,
         hero_name: hero.hero_name,
         hero_avatar: hero.hero_avatar,
         hero_role: hero.hero_role,
         hero_specially: hero.hero_specially,
-      }));
-      res.status(200).json(formattedHero[0]);
+      };
+
+      res.status(200).json(formattedHero);
     } catch (error) {
-      if (error.response) {
-        return next({
-          statusCode: error.response.status,
-          message: error.response.data.message || "API error",
-        });
-      } else if (error.request) {
-        return next({
-          statusCode: 503,
-          message: "Service unavailable",
-        });
+      if (error.statusCode) {
+        return next(error);
       }
+      next({
+        statusCode: 500,
+        message: "Internal server error: " + error.message,
+      });
+    }
+  }
+
+  static async addHero(req, res, next) {
+    // add hero
+    try {
+      console.log("Request body:", JSON.stringify(req.body));
+      if (!req.body || Object.keys(req.body).length === 0) {
+        throw {
+          statusCode: 400,
+          message: "Request body is empty or invalid",
+        };
+      }
+
+      const { hero_name, hero_avatar, hero_role, hero_specially } = req.body;
+      const missingFields = [];
+      if (!hero_name) missingFields.push("hero_name");
+      if (!hero_avatar) missingFields.push("hero_avatar");
+      if (!hero_role) missingFields.push("hero_role");
+      if (!hero_specially) missingFields.push("hero_specially");
+      if (missingFields.length > 0) {
+        throw {
+          statusCode: 400,
+          message: `All fields (hero_name, hero_avatar, hero_role, hero_specially) are required. Missing: ${missingFields.join(
+            ", "
+          )}`,
+        };
+      }
+      const UserId = req.user?.id || 1; // Default to user ID 1 if not available
+      const [hero, created] = await Hero.findOrCreate({
+        where: { hero_name: String(hero_name).trim() },
+        defaults: {
+          hero_avatar: String(hero_avatar).trim(),
+          hero_role: String(hero_role).trim(),
+          hero_specially: String(hero_specially).trim(),
+        },
+      });
+      const newFavorite = await Favorite.create({
+        hero_name: String(hero_name).trim(),
+        hero_avatar: String(hero_avatar).trim(),
+        hero_role: String(hero_role).trim(),
+        hero_specially: String(hero_specially).trim(),
+        UserId: UserId,
+        HeroId: hero.id,
+      });
+      console.log("Favorite hero created successfully:", newFavorite.id);
+      res.status(201).json({
+        message: "Hero added to favorites successfully",
+        hero: {
+          id: newFavorite.id,
+          hero_name: newFavorite.hero_name,
+          hero_avatar: newFavorite.hero_avatar,
+          hero_role: newFavorite.hero_role,
+          hero_specially: newFavorite.hero_specially,
+          UserId: newFavorite.UserId,
+          HeroId: newFavorite.HeroId,
+          createdAt: newFavorite.createdAt,
+        },
+      });
+    } catch (error) {
+      console.error("Error in addHero:", error);
       next(error);
     }
   }
@@ -95,16 +160,34 @@ class HeroController {
         throw { statusCode: 400, message: "Hero ID is required" };
       }
       const { hero_name, hero_avatar, hero_role, hero_specially } = req.body;
+
+      // First find the hero in the Hero model
       const hero = await Hero.findByPk(id);
       if (!hero) {
         throw { statusCode: 404, message: "Hero not found" };
       }
+
+      // Update the hero
       await hero.update({
         hero_name: hero_name || hero.hero_name,
         hero_avatar: hero_avatar || hero.hero_avatar,
         hero_role: hero_role || hero.hero_role,
         hero_specially: hero_specially || hero.hero_specially,
       });
+
+      // Also update any related favorites
+      await Favorite.update(
+        {
+          hero_name: hero_name || hero.hero_name,
+          hero_avatar: hero_avatar || hero.hero_avatar,
+          hero_role: hero_role || hero.hero_role,
+          hero_specially: hero_specially || hero.hero_specially,
+        },
+        {
+          where: { HeroId: id },
+        }
+      );
+
       res.status(200).json({
         message: "Hero updated successfully",
         hero: {
@@ -131,7 +214,15 @@ class HeroController {
       if (!hero) {
         throw { statusCode: 404, message: "Hero not found" };
       }
+
+      // Delete related favorites first
+      await Favorite.destroy({
+        where: { HeroId: id },
+      });
+
+      // Then delete the hero
       await hero.destroy();
+
       res.status(200).json({
         message: "Hero deleted successfully",
         deletedHero: {
@@ -146,5 +237,26 @@ class HeroController {
     }
   }
 }
+
+// static async getFavorite(req, res, next) {
+//     try {
+//       let favorite = await Favorite.findAll();
+//       res.status(200).json(favorite);
+//     } catch (error) {
+//       next(error);
+//     }
+//   }
+
+//   static async deleteFavorite(req, res, next) {
+//     try {
+//       let favoriteId = req.params.id;
+//       let favorite = await Favorite.findByPk(favoriteId);
+//       await favorite.destroy();
+//       res.status(200).json({ message: `${favorite.name} success to delete` });
+//     } catch (error) {
+//       // console.log(error);
+//       next(error);
+//     }
+//   }
 
 module.exports = HeroController;

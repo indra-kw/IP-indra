@@ -6,34 +6,18 @@ module.exports = {
     const favorites = [
       {
         UserId: 1,
-        HeroId: 1,
+        HeroId: 6, // Changed from 1 to 6 (Alucard's ID from hero.json)
+        hero_name: "Alucard",
+        hero_avatar: "https://akmweb.youngjoygame.com/web/svnres/img/mlbb/homepage/100_2a0606e575ae278db77134b50ccef7ac.png",
+        hero_role: "Fighter,Assassin",
+        hero_specially: "Charge,Crowd Control",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-      {
-        UserId: 1,
-        HeroId: 2,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        UserId: 2,
-        HeroId: 3,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      // You can add more favorites here if needed
     ];
 
     await queryInterface.bulkInsert("Favorites", favorites, {});
-    /**
-     * Add seed commands here.
-     *
-     * Example:
-     * await queryInterface.bulkInsert('People', [{
-     *   name: 'John Doe',
-     *   isBetaMember: false
-     * }], {});
-     */
   },
 
   async down(queryInterface, Sequelize) {
@@ -42,11 +26,5 @@ module.exports = {
       cascade: true,
       restartIdentity: true,
     });
-    /**
-     * Add commands to revert seed here.
-     *
-     * Example:
-     * await queryInterface.bulkDelete('People', null, {});
-     */
   },
 };
