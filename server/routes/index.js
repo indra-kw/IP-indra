@@ -6,6 +6,7 @@ const router = require("express").Router();
 
 router.post("/register", UserController.Register);
 router.post("/login", UserController.Login);
+router.post("/authgoogle", UserController.googleLogin); // Add this new route to match frontend request
 
 router.get("/favorite", FavoriteController.getFavorite);
 router.put("/favorite/:id", FavoriteController.editFavorite);
