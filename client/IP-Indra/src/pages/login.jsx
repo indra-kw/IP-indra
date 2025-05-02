@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { Link, Navigate, useNavigate } from "react-router"; // Fix import
 import { api } from "../helpers/http-client";
 
 export default function Login() {
@@ -8,6 +8,51 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [googleInitialized, setGoogleInitialized] = useState(false);
+
+  useEffect(() => {
+    // Only initialize Google Sign-In once
+    if (window.google && !googleInitialized) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: async (response) => {
+            try {
+              const { data } = await api.post("/authgoogle", {
+                googleToken: response.credential,
+              });
+              console.log(response);
+
+              localStorage.setItem("access_token", data.access_token);
+              navigate("/");
+            } catch (error) {
+              console.error("Google OAuth error:", error);
+            }
+          },
+          cancel_on_tap_outside: false,
+        });
+
+        // Only render the button if the buttonDiv element exists
+        const buttonDiv = document.getElementById("buttonDiv");
+        if (buttonDiv) {
+          window.google.accounts.id.renderButton(buttonDiv, {
+            theme: "outline",
+            size: "large",
+            type: "standard",
+          });
+        }
+
+        // Call prompt only once
+        setTimeout(() => {
+          window.google.accounts.id.prompt();
+        }, 1000);
+
+        setGoogleInitialized(true);
+      } catch (err) {
+        console.error("Failed to initialize Google Sign-In:", err);
+      }
+    }
+  }, [navigate, googleInitialized]);
 
   if (access_token) {
     return <Navigate to={"/"} />;
@@ -71,6 +116,10 @@ export default function Login() {
             <button type="submit" className="btn btn-primary mt-4 w-100">
               Login
             </button>
+            <div className="text-center mt-3 mb-2">
+              <span>or</span>
+            </div>
+            <div id="buttonDiv" className="d-flex justify-content-center"></div>
             <p className="text-center mt-3">
               Don't have an account? <Link to="/register">Register Now</Link>
             </p>
