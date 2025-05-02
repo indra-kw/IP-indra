@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
+import { api } from "../helpers/http-client";
 
 export default function MyFavorite() {
   const [favorites, setFavorites] = useState([]);
@@ -38,7 +39,7 @@ export default function MyFavorite() {
         return;
       }
 
-      const response = await axios.get("http://localhost:3009/favorite", {
+      const response = await api.get("/favorite", {
         timeout: 5000,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -82,7 +83,7 @@ export default function MyFavorite() {
         return;
       }
 
-      await axios.delete(`http://localhost:3009/favorite/${id}`, {
+      await api.delete(`/favorite/${id}`, {
         timeout: 5000,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -147,8 +148,8 @@ export default function MyFavorite() {
 
       // Using the api helper instead of direct axios call
       // This ensures we're using the baseURL configured in http-client.js
-      const response = await axios.post(
-        "http://localhost:3009/gemini/generate",
+      const response = await api.post(
+        "/gemini/generate",
         {
           prompt: contextPrompt,
           model: "gemini-1.5-pro",

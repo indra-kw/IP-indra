@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import Swal from "sweetalert2";
+import { api } from "../helpers/http-client";
 
 export default function Home() {
   const [hero, setHero] = useState([]);
@@ -45,15 +46,11 @@ export default function Home() {
         hero_role: hero.hero_role,
         hero_specially: hero.hero_specially,
       };
-      const response = await axios.post(
-        "http://localhost:3009/hero",
-        heroData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.post("/hero", heroData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       navigate("/favorite");
     } catch (error) {
       console.error("Error adding hero to favorites:", error);
@@ -132,7 +129,7 @@ export default function Home() {
   async function fetchHero() {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:3009/hero", {
+      const response = await api.get("/hero", {
         timeout: 5000,
       });
       setHero(response.data);
@@ -155,7 +152,7 @@ export default function Home() {
       if (!selectedRole) {
         throw new Error("Role not found");
       }
-      const response = await axios.get("http://localhost:3009/hero", {
+      const response = await api.get("/hero", {
         timeout: 5000,
       });
       const filteredHeroes = response.data.filter(
@@ -189,7 +186,7 @@ export default function Home() {
       if (!selectedSpecialty) {
         throw new Error("Specialty not found");
       }
-      const response = await axios.get("http://localhost:3009/hero", {
+      const response = await api.get("/hero", {
         timeout: 5000,
       });
       const filteredHeroes = response.data.filter(
@@ -227,7 +224,7 @@ export default function Home() {
     try {
       setLoading(true);
       setIsSearching(true);
-      const response = await axios.get("http://localhost:3009/hero", {
+      const response = await api.get("/hero", {
         timeout: 5000,
       });
       const filteredHeroes = response.data.filter(
