@@ -60,6 +60,17 @@ export default function Navbar() {
                     My Favorite
                   </Link>
                 </li>
+                {isLoggedIn && (
+                  <li className="nav-item">
+                    <Link
+                      to={"/profile"}
+                      className="nav-link active"
+                      aria-current="page"
+                    >
+                      Profile
+                    </Link>
+                  </li>
+                )}
                 <li className="nav-item">
                   {isLoggedIn ? (
                     <button onClick={handleLogout} className="nav-link active">

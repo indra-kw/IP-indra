@@ -5,6 +5,8 @@ import Home from "./pages/home";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import MyFavorite from "./pages/myfavorite";
+import Profile from "./pages/profile";
+import EditProfile from "./pages/editProfile";
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
           <Route path="/" element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/favorite" element={<MyFavorite />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/edit-profile" element={<EditProfile />} />
           </Route>
         </Routes>
       </BrowserRouter>

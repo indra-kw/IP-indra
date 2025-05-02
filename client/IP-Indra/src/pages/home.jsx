@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
+import Swal from "sweetalert2";
 
 export default function Home() {
   const [hero, setHero] = useState([]);
@@ -28,8 +29,14 @@ export default function Home() {
       setAddingToFavorite(true);
       const token = localStorage.getItem("access_token");
       if (!token) {
-        alert("Please login first to add favorites");
-        navigate("/login");
+        Swal.fire({
+          title: "Authentication Required",
+          text: "Please login first to add favorites",
+          icon: "warning",
+          confirmButtonText: "Go to Login",
+        }).then(() => {
+          navigate("/login");
+        });
         return;
       }
       const heroData = {

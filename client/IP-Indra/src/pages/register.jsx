@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { api } from "../helpers/http-client";
+import Swal from "sweetalert2";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -16,9 +17,22 @@ export default function Register() {
         email,
         password,
       });
+      Swal.fire({
+        icon: "success",
+        title: "Registration Successful",
+        text: "You have been registered successfully!",
+        timer: 1500,
+      });
       navigate("/login");
     } catch (error) {
       console.log(error);
+      Swal.fire({
+        icon: "error",
+        title: "Registration Failed",
+        text:
+          error.response?.data?.message ||
+          "Something went wrong. Please try again.",
+      });
     }
   }
 

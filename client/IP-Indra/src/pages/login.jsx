@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, Navigate, useNavigate } from "react-router"; // Fix import
 import { api } from "../helpers/http-client";
+import Swal from "sweetalert2";
 
 export default function Login() {
   const access_token = localStorage.getItem("access_token");
@@ -24,9 +25,22 @@ export default function Login() {
               console.log(response);
 
               localStorage.setItem("access_token", data.access_token);
+              Swal.fire({
+                icon: "success",
+                title: "Login Successful",
+                text: "You have successfully logged in with Google!",
+                timer: 1500,
+              });
               navigate("/");
             } catch (error) {
               console.error("Google OAuth error:", error);
+              Swal.fire({
+                icon: "error",
+                title: "Google Login Failed",
+                text:
+                  error.response?.data?.message ||
+                  "Failed to login with Google. Please try again.",
+              });
             }
           },
           cancel_on_tap_outside: false,
@@ -50,6 +64,11 @@ export default function Login() {
         setGoogleInitialized(true);
       } catch (err) {
         console.error("Failed to initialize Google Sign-In:", err);
+        Swal.fire({
+          icon: "error",
+          title: "Google Integration Failed",
+          text: "Failed to initialize Google Sign-In. Please try again later.",
+        });
       }
     }
   }, [navigate, googleInitialized]);
@@ -66,9 +85,22 @@ export default function Login() {
         password,
       });
       localStorage.setItem("access_token", response.data.access_token);
+      Swal.fire({
+        icon: "success",
+        title: "Login Successful",
+        text: "You have been logged in successfully!",
+        timer: 1500,
+      });
       navigate("/");
     } catch (error) {
       console.log(error);
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text:
+          error.response?.data?.message ||
+          "Invalid email or password. Please try again.",
+      });
     }
   }
 
