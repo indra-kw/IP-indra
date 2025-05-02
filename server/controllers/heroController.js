@@ -92,6 +92,7 @@ class HeroController {
   }
 
   static async addHero(req, res, next) {
+    // add hero
     try {
       console.log("Request body:", JSON.stringify(req.body));
       if (!req.body || Object.keys(req.body).length === 0) {
