@@ -39,7 +39,7 @@ export default function MyFavorite() {
         return;
       }
 
-      const response = await api.get("https://ip.indrakw.store/favorite", {
+      const response = await api.get("/favorite", {
         timeout: 5000,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -83,7 +83,7 @@ export default function MyFavorite() {
         return;
       }
 
-      await api.delete(`https://ip.indrakw.store/favorite/${id}`, {
+      await api.delete(`/favorite/${id}`, {
         timeout: 5000,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -149,7 +149,7 @@ export default function MyFavorite() {
       // Using the api helper instead of direct axios call
       // This ensures we're using the baseURL configured in http-client.js
       const response = await api.post(
-        "https://ip.indrakw.store/gemini/generate",
+        "/gemini/generate",
         {
           prompt: contextPrompt,
           model: "gemini-1.5-pro",

@@ -186,7 +186,7 @@ export default function Home() {
       if (!selectedSpecialty) {
         throw new Error("Specialty not found");
       }
-      const response = await api.get("https://ip.indrakw.store/hero", {
+      const response = await api.get("/hero", {
         timeout: 5000,
       });
       const filteredHeroes = response.data.filter(
@@ -224,7 +224,7 @@ export default function Home() {
     try {
       setLoading(true);
       setIsSearching(true);
-      const response = await api.get("https://ip.indrakw.store/hero", {
+      const response = await api.get("/hero", {
         timeout: 5000,
       });
       const filteredHeroes = response.data.filter(
